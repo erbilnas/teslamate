@@ -6,3 +6,4 @@ acme/acme.json
 *.pub
 .DS_Store
 .cursor/
+.ssh/
