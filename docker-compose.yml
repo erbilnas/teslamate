@@ -31,6 +31,32 @@ services:
     cap_drop:
       - ALL
 
+  teslamateapi:
+    image: tobiasehlert/teslamateapi:latest
+    restart: always
+    depends_on:
+      - database
+    environment:
+      - ENCRYPTION_KEY=${TM_ENCRYPTION_KEY}
+      - DATABASE_USER=${TM_DB_USER}
+      - DATABASE_PASS=${TM_DB_PASS}
+      - DATABASE_NAME=${TM_DB_NAME}
+      - DATABASE_HOST=database
+      - MQTT_HOST=mosquitto
+      - TZ=${TM_TZ}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8080"
+      - "traefik.http.middlewares.redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.teslamateapi-auth.basicauth.realm=teslamateapi"
+      - "traefik.http.middlewares.teslamateapi-auth.basicauth.usersfile=/auth/.htpasswd"
+      - "traefik.http.routers.teslamateapi-insecure.rule=Host(`${FQDN_TM}`)"
+      - "traefik.http.routers.teslamateapi-insecure.middlewares=redirect"
+      - "traefik.http.routers.teslamateapi.rule=Host(`${FQDN_TM}`) && (Path(`/api`) || PathPrefix(`/api/`))"
+      - "traefik.http.routers.teslamateapi.entrypoints=websecure"
+      - "traefik.http.routers.teslamateapi.middlewares=teslamateapi-auth"
+      - "traefik.http.routers.teslamateapi.tls.certresolver=tmhttpchallenge"
+
   database:
     image: postgres:18-trixie
     restart: always
