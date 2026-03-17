@@ -2,3 +2,7 @@
 .htpasswd
 acme/acme.json
 *.log
+*.key
+*.pub
+.DS_Store
+.cursor/
